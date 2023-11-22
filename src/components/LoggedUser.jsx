@@ -1,0 +1,89 @@
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import Avatar from "@mui/material/Avatar";
+import ListGroup from "react-bootstrap/ListGroup";
+import NoteAltIcon from "@mui/icons-material/NoteAlt";
+import EmailIcon from "@mui/icons-material/Email";
+import HandshakeIcon from "@mui/icons-material/Handshake";
+import Button from "@mui/material/Button";
+import { Link } from "react-router-dom";
+
+const LoggedUser = () => {
+  const userDetail = localStorage.getItem("userDetails");
+  const [singleUser, setSingleUser] = useState([]);
+
+  const getSingleUser = () => {
+    axios
+      .get(`http://localhost:8007/user/get-single-user/${userDetail}`)
+      .then((response) => {
+        // console.log(response.data);
+        if (response.status === 200) {
+          setSingleUser(response.data.data);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  useEffect(() => {
+    getSingleUser();
+  }, [singleUser]);
+
+  const formatCreatedAt = (createdAt) => {
+    const date = new Date(createdAt);
+    return date.toLocaleDateString();
+  };
+  return (
+    <div>
+      <div className="d-flex justify-content-center">
+        <Avatar
+          alt=""
+          src={`http://localhost:8007/uploads/newFolder/${singleUser.ProfilePic}`}
+          sx={{ width: 200, height: 200, textAlign: "center" }}
+          className="img-fluid"
+        />
+      </div>
+      <div className="pro-text my-3 text-dark">
+        <h2 className="fw-bold text-dark">
+          {singleUser?.firstname} {singleUser?.lastname}{""}
+        </h2>
+        <span className="fs-6">Username: {singleUser?.username}</span>
+        <div className="followers d-flex justify-content-around align-items-center my-4">
+          <span>
+            <span className="fw-bold">0</span> Posts
+          </span>
+          <span>
+            <span className="fw-bold">{singleUser?.followers?.length}</span>{" "}
+            Followers
+          </span>
+          <span>
+            <span className="fw-bold">{singleUser?.following?.length}</span>{" "}
+            Following
+          </span>
+        </div>
+        <ListGroup className="text-start my-3">
+          <ListGroup.Item>
+            <NoteAltIcon className="text-primary" /> {singleUser.bio}
+          </ListGroup.Item>
+          <ListGroup.Item>
+            <EmailIcon className="text-primary" /> {singleUser.email}
+          </ListGroup.Item>
+          <ListGroup.Item>
+            <HandshakeIcon className="text-primary" /> Joined on{" "}
+            {formatCreatedAt(singleUser.createdAt)}
+          </ListGroup.Item>
+        </ListGroup>
+        <div className="d-flex justify-content-center align-items-center btn-group">
+          <Button>
+            <Link to="/view-profile" className="text-decoration-none btn-group">
+              View Profile
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LoggedUser;
